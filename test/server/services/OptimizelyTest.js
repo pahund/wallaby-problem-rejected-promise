@@ -227,6 +227,7 @@ describe('[server/services/Optimizely]', () => {
             beforeEach(() => {
                 // important: no short hand arrow function here!
                 result = optimizely.fetch();
+                result.catch(() => {});
             });
             describe('the result', () => {
                 it('is a promise', () => result.should.be.a('promise'));
@@ -302,10 +303,12 @@ function setup(
     scenario
 ) {
     const mySandbox = sandbox.create();
+    const rejection = Promise.reject(new Error('nope'));
+    rejection.catch(() => {});
     const fake = {
         getUserId: mySandbox.stub().returns(userId),
         getData: mySandbox.stub().returns(scenario === scenarios.FETCH_DATA_FAILURE ?
-            Promise.reject(new Error('nope')) : Promise.resolve(data)),
+            rejection : Promise.resolve(data)),
         getClient: mySandbox.stub().returns(client),
         withUsecase: mySandbox.stub().callsFake((name, logger, func) => (...args) => func(...args)),
         loggerDebug: mySandbox.spy(),
